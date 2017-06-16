@@ -1,4 +1,5 @@
 /* Copyright 2017, Gustavo Muro
+ * Copyright 2014, Pablo Ridolfi
  *
  * This file is part of CIAA Firmware.
  *
@@ -50,7 +51,6 @@
 
 /*==================[macros and definitions]=================================*/
 #define FIRST_START_DELAY_MS 350
-#define SECOND_START_DELAY_MS 2000
 #define PERIOD_MS 250
 
 /*==================[internal data declaration]==============================*/
@@ -115,52 +115,30 @@ TASK(InitTask)
 {
    bsp_init();
 
-   SetRelAlarm(ActivatePeriodicTask, FIRST_START_DELAY_MS, PERIOD_MS);
+   SetRelAlarm(ActivateEvBlink, FIRST_START_DELAY_MS, PERIOD_MS);
 
    TerminateTask();
 }
 
-/** \brief Periodic Task
- *
- * This task is started automatically every time that the alarm
- * ActivatePeriodicTask expires.
- *
- */
-TASK(PeriodicTask)
+TASK(LoopTask)
 {
    static char state = 0;
 
-   state = 1-state;
+   while (1)
+   {
+      WaitEvent(evBlink);
+      ClearEvent(evBlink);
 
-   if (state)
-      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_ON);
-   else
-      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_OFF);
+      state = 1-state;
 
-   TerminateTask();
-}
-
-
-TASK(PeriodicTask2)
-{
-   static char state = 0;
-
-   state = 1-state;
-
-   if (state)
-      bsp_ledAction(BOARD_LED_ID_RED, BSP_LED_ACTION_ON);
-   else
-      bsp_ledAction(BOARD_LED_ID_RED, BSP_LED_ACTION_OFF);
+      if (state)
+         bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_ON);
+      else
+         bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_OFF);
+   }
 
    TerminateTask();
 }
-
-TASK(CheckButton)
-{
-
-}
-
-
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */

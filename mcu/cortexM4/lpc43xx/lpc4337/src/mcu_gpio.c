@@ -46,8 +46,15 @@
 #include "mcu.h"
 #include "stdint.h"
 #include "chip.h"
+#include "os.h"
 
 /*==================[macros and definitions]=================================*/
+/* PININT index used for GPIO mapping */
+#define PININT_INDEX 0
+/* GPIO interrupt NVIC interrupt name */
+#define PININT_NVIC_NAME    PIN_INT0_IRQn
+
+
 /** \brief Dio Type */
 typedef struct
 {
@@ -62,15 +69,31 @@ typedef struct
    uint16_t modefunc;
 }p_gpio_type;
 
+typedef struct
+{
+   mcu_gpio_eventInput_callBack_type cb;
+   mcu_gpio_eventTypeInput_enum evType;
+   mcu_gpio_pinId_enum pinId;
+}eventsInputs_type;
+
 /*==================[internal data declaration]==============================*/
 
 static const p_gpio_type p_gpio[] =
 {
-   {{2,10}, {0,14}, FUNC0},
-   {{2,11}, {1,11}, FUNC0},
-   {{1,0}, {0,4}, FUNC0},
-   {{1,1}, {0,8}, FUNC0},
+   {{2,0},   {5,0},   FUNC4},
+   {{2,1},   {5,1},   FUNC3},
+   {{2,2},   {5,2},   FUNC4},
+   {{2,10},  {0,14},  FUNC0},
+   {{2,11},  {1,11},  FUNC0},
+   {{2,12},  {1,12},  FUNC0},
+   {{1,0},   {0,4},   FUNC0},
+   {{1,1},   {0,8},   FUNC0},
+   {{1,2},   {0,9},   FUNC0},
+   {{1,6},   {1,9},   FUNC0},
 };
+
+static eventsInputs_type eventsInputs[MCU_GPIO_IN_EVENT_TOTAL];
+static volatile variable = 0;
 
 /*==================[internal functions declaration]=========================*/
 
@@ -83,21 +106,39 @@ static const p_gpio_type p_gpio[] =
 /*==================[external functions definition]==========================*/
 extern void mcu_gpio_init(void)
 {
+   int32_t i;
+
+   Chip_Clock_Enable(CLK_MX_GPIO);
    Chip_GPIO_Init(LPC_GPIO_PORT);
+
+   for (i = 0 ; i < MCU_GPIO_IN_EVENT_TOTAL ; i++)
+   {
+      eventsInputs[i].cb = NULL;
+   }
 }
 
 extern void mcu_gpio_setDirection(mcu_gpio_pinId_enum id,
                                   mcu_gpio_direction_enum dir)
 {
-   Chip_SCU_PinMux(p_gpio[id].p.port,
-                   p_gpio[id].p.pin,
-                   MD_PLN,
-                   p_gpio[id].modefunc);
+   if(dir == MCU_GPIO_DIRECTION_INPUT)
+   {
+	   Chip_SCU_PinMux(p_gpio[id].p.port,
+	                   p_gpio[id].p.pin,
+	                   MD_EZI,
+	                   p_gpio[id].modefunc);
+   }
+   else
+   {
+	   Chip_SCU_PinMux(p_gpio[id].p.port,
+	                   p_gpio[id].p.pin,
+	                   MD_PLN,
+	                   p_gpio[id].modefunc);
+   }
 
    Chip_GPIO_SetDir(LPC_GPIO_PORT,
                     p_gpio[id].gpio.port,
                     (1<<p_gpio[id].gpio.pin),
-                    (dir == MCU_GPIO_DIRECTION_OUTPUT));
+                    ((uint8_t)dir == MCU_GPIO_DIRECTION_OUTPUT));
 }
 
 extern void mcu_gpio_setOut(mcu_gpio_pinId_enum id, bool state)
@@ -113,6 +154,68 @@ extern bool mcu_gpio_readInput(mcu_gpio_pinId_enum id)
    return Chip_GPIO_GetPinState(LPC_GPIO_PORT,
                                 p_gpio[id].gpio.port,
                                 p_gpio[id].gpio.pin);
+}
+
+extern int32_t mcu_gpio_setEventInput(mcu_gpio_pinId_enum id,
+                                      mcu_gpio_eventTypeInput_enum evType,
+                                      mcu_gpio_eventInput_callBack_type cb)
+{
+   int32_t i;
+   int32_t ret = -1;
+
+   for (i = 0 ; (i < MCU_GPIO_IN_EVENT_TOTAL) && (ret == -1) ; i++)
+   {
+      if (eventsInputs[i].cb == NULL)
+      {
+         eventsInputs[i].cb = cb;
+         eventsInputs[i].evType = evType;
+         eventsInputs[i].pinId = id;
+         ret = 0;
+      }
+   }
+
+   Chip_PININT_Init(LPC_GPIO_PIN_INT);
+
+   /* Configure interrupt channel for the GPIO pin in SysCon block */
+   Chip_SCU_GPIOIntPinSel(0,
+                          p_gpio[id].gpio.port,
+                          p_gpio[id].gpio.pin);
+
+   /* Falling edge IRQ */
+   Chip_PININT_SetPinModeEdge(LPC_GPIO_PIN_INT, PININTCH0);
+
+   /* Configure channel interrupt as edge sensitive and falling edge
+      interrupt */
+   switch(evType)
+   {
+      case MCU_GPIO_EVENT_TYPE_INPUT_FALLING_EDGE:
+         Chip_PININT_EnableIntLow(LPC_GPIO_PIN_INT, PININTCH0);
+         break;
+      case MCU_GPIO_EVENT_TYPE_INPUT_RISING_EDGE:
+         Chip_PININT_EnableIntHigh(LPC_GPIO_PIN_INT, PININTCH0);
+         break;
+   }
+
+   /* Enable interrupt in the NVIC */
+   NVIC_EnableIRQ(PIN_INT0_IRQn);
+
+   return ret;
+}
+
+ISR(GPIOINTHandler0)
+{
+   mcu_gpio_pinId_enum idPin;
+   mcu_gpio_eventTypeInput_enum evType;
+
+   /* Clear interrupt */
+   Chip_PININT_ClearIntStatus(LPC_GPIO_PIN_INT, PININTCH0);
+
+   // determinar pin que interrumpio y guardarlo en idPin
+   // determinar flanco y guardarlo en evType
+
+   eventsInputs[0].cb(idPin, evType);
+
+   return;
 }
 
 /** @} doxygen end group definition */

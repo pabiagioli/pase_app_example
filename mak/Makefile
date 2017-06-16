@@ -35,7 +35,7 @@
 # Project Name: based on Project Path and used to define OSEK configuration file
 PROJECT_NAME         = $(lastword $(subst $(DS), , $(PROJECT_PATH)))
 
-PASE_APP_SEL 		?= 1
+PASE_APP_SEL 		?= 3
 
 # Internal modules
 $(PROJECT_NAME)_SRC_PATH  += $(PROJECT_PATH)$(DS)application$(PASE_APP_SEL)$(DS)src
@@ -58,7 +58,4 @@ OIL_FILES            += $(PROJECT_PATH)$(DS)application$(PASE_APP_SEL)$(DS)etc$(
 
 # Modules needed for this project
 MODS ?= modules$(DS)rtos	\
-		  modules$(DS)drivers\
-		  modules$(DS)posix  \
-		  modules$(DS)libs	\
-		  modules$(DS)ciaak
+		externals$(DS)drivers

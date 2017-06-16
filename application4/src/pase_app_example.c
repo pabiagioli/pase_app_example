@@ -47,10 +47,10 @@
 #include "os.h"
 #include "pase_app_example.h"
 #include "bsp.h"
+#include "mcu.h"
 
 /*==================[macros and definitions]=================================*/
 #define FIRST_START_DELAY_MS 350
-#define SECOND_START_DELAY_MS 2000
 #define PERIOD_MS 250
 
 /*==================[internal data declaration]==============================*/
@@ -62,6 +62,10 @@
 /*==================[external data definition]===============================*/
 
 /*==================[internal functions definition]==========================*/
+static void eventInput_callBack(mcu_gpio_pinId_enum id, mcu_gpio_eventTypeInput_enum evType)
+{
+   ActivateTask(InputEvTask);
+}
 
 /*==================[external functions definition]==========================*/
 /** \brief Main function
@@ -115,7 +119,9 @@ TASK(InitTask)
 {
    bsp_init();
 
-   SetRelAlarm(ActivatePeriodicTask, FIRST_START_DELAY_MS, PERIOD_MS);
+   mcu_gpio_setEventInput(MCU_GPIO_PIN_ID_38,
+         MCU_GPIO_EVENT_TYPE_INPUT_FALLING_EDGE,
+         eventInput_callBack);
 
    TerminateTask();
 }
@@ -126,41 +132,19 @@ TASK(InitTask)
  * ActivatePeriodicTask expires.
  *
  */
-TASK(PeriodicTask)
+TASK(InputEvTask)
 {
    static char state = 0;
 
    state = 1-state;
 
    if (state)
-      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_ON);
+      bsp_ledAction(BOARD_LED_ID_2, BSP_LED_ACTION_ON);
    else
-      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_OFF);
+      bsp_ledAction(BOARD_LED_ID_2, BSP_LED_ACTION_OFF);
 
    TerminateTask();
 }
-
-
-TASK(PeriodicTask2)
-{
-   static char state = 0;
-
-   state = 1-state;
-
-   if (state)
-      bsp_ledAction(BOARD_LED_ID_RED, BSP_LED_ACTION_ON);
-   else
-      bsp_ledAction(BOARD_LED_ID_RED, BSP_LED_ACTION_OFF);
-
-   TerminateTask();
-}
-
-TASK(CheckButton)
-{
-
-}
-
-
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */

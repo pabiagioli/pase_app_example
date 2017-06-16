@@ -57,33 +57,66 @@ OSEK OSEK {
    APPMODE = AppMode1;
 
    TASK InitTask {
-      PRIORITY = 1;
+      PRIORITY = 10;
       ACTIVATION = 1;
       AUTOSTART = TRUE {
          APPMODE = AppMode1;
-      }
+      };
+      STACK = 512;
+      TYPE = BASIC;
+      SCHEDULE = NON;
+   }
+
+   TASK Task1 {
+      PRIORITY = 2;
+      ACTIVATION = 1;
+      STACK = 512;
+      TYPE = BASIC;
+      SCHEDULE = FULL;
+   }
+
+   TASK Task2 {
+      PRIORITY = 2;
+      ACTIVATION = 1;
+      STACK = 512;
+      TYPE = BASIC;
+      SCHEDULE = FULL;
+   }
+
+   TASK PeriodicTask {
+      PRIORITY = 3;
+      ACTIVATION = 1;
       STACK = 512;
       TYPE = EXTENDED;
       SCHEDULE = NON;
    }
 
-   TASK PeriodicTask {
-      PRIORITY = 2;
-      ACTIVATION = 1;
-      STACK = 512;
-      TYPE = EXTENDED;
-      SCHEDULE = NON;
+   ALARM RunCallBack10ms {
+      COUNTER = HardwareCounter;
+      AUTOSTART = TRUE {
+         ALARMTIME = 10;
+         CYCLETIME = 10;
+         APPMODE = AppMode1;
+      };
+      ACTION = ALARMCALLBACK {
+         ALARMCALLBACKNAME = CallBack10ms;
+      };
    }
-   
+
    ALARM ActivatePeriodicTask {
       COUNTER = HardwareCounter;
+      AUTOSTART = TRUE {
+         ALARMTIME = 5;
+         CYCLETIME = 500;
+         APPMODE = AppMode1;
+      };
       ACTION = ACTIVATETASK {
          TASK = PeriodicTask;
       }
    }
 
    COUNTER HardwareCounter {
-      MAXALLOWEDVALUE = 3000;
+      MAXALLOWEDVALUE = 1000;
       TICKSPERBASE = 1;
       MINCYCLE = 1;
       TYPE = HARDWARE;

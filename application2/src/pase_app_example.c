@@ -47,13 +47,12 @@
 #include "os.h"
 #include "pase_app_example.h"
 #include "bsp.h"
+#include "stdint.h"
 
 /*==================[macros and definitions]=================================*/
-#define FIRST_START_DELAY_MS 350
-#define SECOND_START_DELAY_MS 2000
-#define PERIOD_MS 250
 
 /*==================[internal data declaration]==============================*/
+static uint32_t timerUp10ms = 0;
 
 /*==================[internal functions declaration]=========================*/
 
@@ -115,17 +114,36 @@ TASK(InitTask)
 {
    bsp_init();
 
-   SetRelAlarm(ActivatePeriodicTask, FIRST_START_DELAY_MS, PERIOD_MS);
+   ActivateTask(Task1);
 
    TerminateTask();
 }
 
-/** \brief Periodic Task
- *
- * This task is started automatically every time that the alarm
- * ActivatePeriodicTask expires.
- *
- */
+TASK(Task1)
+{
+   if (timerUp10ms & 0b10000)
+      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_ON);
+   else
+      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_OFF);
+
+   ChainTask(Task2);
+}
+
+TASK(Task2)
+{
+   if (timerUp10ms & 0b100000)
+      bsp_ledAction(BOARD_LED_ID_2, BSP_LED_ACTION_ON);
+   else
+      bsp_ledAction(BOARD_LED_ID_2, BSP_LED_ACTION_OFF);
+
+   ChainTask(Task1);
+}
+
+ALARMCALLBACK(CallBack10ms)
+{
+	timerUp10ms++;
+}
+
 TASK(PeriodicTask)
 {
    static char state = 0;
@@ -133,34 +151,12 @@ TASK(PeriodicTask)
    state = 1-state;
 
    if (state)
-      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_ON);
+      bsp_ledAction(BOARD_LED_ID_3, BSP_LED_ACTION_ON);
    else
-      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_OFF);
+      bsp_ledAction(BOARD_LED_ID_3, BSP_LED_ACTION_OFF);
 
    TerminateTask();
 }
-
-
-TASK(PeriodicTask2)
-{
-   static char state = 0;
-
-   state = 1-state;
-
-   if (state)
-      bsp_ledAction(BOARD_LED_ID_RED, BSP_LED_ACTION_ON);
-   else
-      bsp_ledAction(BOARD_LED_ID_RED, BSP_LED_ACTION_OFF);
-
-   TerminateTask();
-}
-
-TASK(CheckButton)
-{
-
-}
-
-
 
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
