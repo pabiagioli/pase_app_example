@@ -73,24 +73,45 @@ OSEK OSEK {
       EVENT = POSIXE;
    }
 
-   TASK PeriodicTask {
+   TASK ToggleLed {
       PRIORITY = 2;
       ACTIVATION = 1;
       STACK = 512;
       TYPE = EXTENDED;
-      SCHEDULE = NON;
+      SCHEDULE = FULL;
       RESOURCE = POSIXR;
-      EVENT = POSIXE;
+   	  EVENT = POSIXE;
    }
    
-   ALARM ActivatePeriodicTask {
+   TASK CheckButton {
+   		AUTOSTART = TRUE {
+         APPMODE = AppMode1;
+      }
+      PRIORITY = 3;
+      ACTIVATION = 1;
+      STACK = 512;
+      TYPE = EXTENDED;
+      SCHEDULE = FULL;
+      RESOURCE = POSIXR;
+   	  EVENT = POSIXE;
+   }
+   
+	ALARM ActivateEvent {
       COUNTER = HardwareCounter;
       ACTION = ACTIVATETASK {
-         TASK = PeriodicTask;
+         TASK = ToggleLed;
+      }
+   }
+      
+	ALARM CheckButtonPoll {
+      COUNTER = HardwareCounter;
+      ACTION = ACTIVATETASK {
+         TASK = CheckButton;
       }
    }
 
-   COUNTER HardwareCounter {
+
+	COUNTER HardwareCounter {
       MAXALLOWEDVALUE = 3000;
       TICKSPERBASE = 1;
       MINCYCLE = 1;

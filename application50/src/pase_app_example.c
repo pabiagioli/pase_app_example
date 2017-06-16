@@ -116,6 +116,7 @@ TASK(InitTask)
    bsp_init();
 
    SetRelAlarm(ActivatePeriodicTask, FIRST_START_DELAY_MS, PERIOD_MS);
+   SetRelAlarm(ActivatePeriodicTask2, SECOND_START_DELAY_MS, PERIOD_MS);
 
    TerminateTask();
 }
@@ -153,11 +154,6 @@ TASK(PeriodicTask2)
       bsp_ledAction(BOARD_LED_ID_RED, BSP_LED_ACTION_OFF);
 
    TerminateTask();
-}
-
-TASK(CheckButton)
-{
-
 }
 
 

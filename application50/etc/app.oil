@@ -83,10 +83,28 @@ OSEK OSEK {
       EVENT = POSIXE;
    }
    
+   TASK PeriodicTask2 {
+      PRIORITY = 2;
+      ACTIVATION = 1;
+      STACK = 512;
+      TYPE = EXTENDED;
+      SCHEDULE = NON;
+      RESOURCE = POSIXR;
+   	  EVENT = POSIXE;
+   }
+      
+
    ALARM ActivatePeriodicTask {
       COUNTER = HardwareCounter;
       ACTION = ACTIVATETASK {
          TASK = PeriodicTask;
+      }
+   }
+
+	ALARM ActivatePeriodicTask2 {
+      COUNTER = HardwareCounter;
+      ACTION = ACTIVATETASK {
+         TASK = PeriodicTask2;
       }
    }
 

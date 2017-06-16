@@ -49,7 +49,7 @@
 #include "bsp.h"
 
 /*==================[macros and definitions]=================================*/
-#define FIRST_START_DELAY_MS 350
+#define TOGGLE_DELAY 1000
 #define SECOND_START_DELAY_MS 2000
 #define PERIOD_MS 250
 
@@ -114,8 +114,8 @@ void ErrorHook(void)
 TASK(InitTask)
 {
    bsp_init();
-
-   SetRelAlarm(ActivatePeriodicTask, FIRST_START_DELAY_MS, PERIOD_MS);
+   SetRelAlarm(CheckButtonPoll, 1, 1);
+   SetRelAlarm(ActivateEvent, 1000, 500);
 
    TerminateTask();
 }
@@ -126,7 +126,7 @@ TASK(InitTask)
  * ActivatePeriodicTask expires.
  *
  */
-TASK(PeriodicTask)
+TASK(ToggleLed)
 {
    static char state = 0;
 
@@ -141,23 +141,11 @@ TASK(PeriodicTask)
 }
 
 
-TASK(PeriodicTask2)
-{
-   static char state = 0;
-
-   state = 1-state;
-
-   if (state)
-      bsp_ledAction(BOARD_LED_ID_RED, BSP_LED_ACTION_ON);
-   else
-      bsp_ledAction(BOARD_LED_ID_RED, BSP_LED_ACTION_OFF);
-
-   TerminateTask();
-}
-
 TASK(CheckButton)
 {
-
+	char status;
+	status = board_switchGet(BOARD_TEC_ID_1);
+	TerminateTask();
 }
 
 
