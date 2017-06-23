@@ -1,5 +1,4 @@
 /* Copyright 2017, Gustavo Muro
- * Copyright 2014, Pablo Ridolfi
  *
  * This file is part of CIAA Firmware.
  *
@@ -50,8 +49,6 @@
 #include "bsp.h"
 
 /*==================[macros and definitions]=================================*/
-#define FIRST_START_DELAY_MS 350
-#define PERIOD_MS 250
 
 /*==================[internal data declaration]==============================*/
 
@@ -115,19 +112,40 @@ TASK(InitTask)
 {
    bsp_init();
 
-   SetRelAlarm(ActivateEvBlink, FIRST_START_DELAY_MS, PERIOD_MS);
+   SetRelAlarm(ActivateKeyboardTask, 10, KEYBOARD_TASK_TIME_MS);
+   SetRelAlarm(ActivateUserTask, 50, 50);
 
    TerminateTask();
 }
 
-TASK(LoopTask)
+TASK(UserTask)
 {
-   while (1)
+   int32_t key;
+
+   key = bsp_keyboardGet();
+
+   if (key == BOARD_TEC_ID_1)
+      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_ON);
+
+   if (key == BOARD_TEC_ID_2)
+      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_OFF);
+
+   if (key == BOARD_TEC_ID_3)
    {
-      WaitEvent(evBlink);
-      ClearEvent(evBlink);
-      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_TOGGLE);
+      bsp_ledAction(BOARD_LED_ID_2, BSP_LED_ACTION_TOGGLE);
    }
+
+   if (bsp_keyboardGetPressed(BOARD_TEC_ID_4, 20))
+      bsp_ledAction(BOARD_LED_ID_3, BSP_LED_ACTION_ON);
+   else
+      bsp_ledAction(BOARD_LED_ID_3, BSP_LED_ACTION_OFF);
+
+   TerminateTask();
+}
+
+TASK(KeyboardTask)
+{
+   bsp_keyboard_task();
 
    TerminateTask();
 }

@@ -64,6 +64,8 @@ static const mcu_gpio_pinId_enum switchMap[] =
 {
    MCU_GPIO_PIN_ID_38,
    MCU_GPIO_PIN_ID_42,
+   MCU_GPIO_PIN_ID_43,
+   MCU_GPIO_PIN_ID_49,
 };
 
 static const int8_t totalLeds = sizeof(ledMap) / sizeof(ledMap[0]);
@@ -78,12 +80,6 @@ static const int8_t totalSwitches = sizeof(switchMap) / sizeof(switchMap[0]);
 /*==================[internal functions definition]==========================*/
 
 /*==================[external functions definition]==========================*/
-void callback_1(mcu_gpio_pinId_enum id,
-                mcu_gpio_eventTypeInput_enum evType)
-{
-   //Dummy
-   return;
-}
 
 extern void board_init(void)
 {
@@ -100,6 +96,11 @@ extern void board_init(void)
    }
 }
 
+extern void board_ledToggle(board_ledId_enum id)
+{
+   mcu_gpio_toggleOut(ledMap[id]);
+}
+
 extern void board_ledSet(board_ledId_enum id, board_ledState_enum state)
 {
    mcu_gpio_setOut(ledMap[id], state == BOARD_LED_STATE_ON);
@@ -107,7 +108,8 @@ extern void board_ledSet(board_ledId_enum id, board_ledState_enum state)
 
 extern board_switchState_enum board_switchGet(board_switchId_enum id)
 {
-   return (mcu_gpio_readInput(switchMap[id])?BOARD_TEC_NON_PRESSED:BOARD_TEC_PRESSED);
+   return (mcu_gpio_readPin(switchMap[id])?BOARD_TEC_NON_PRESSED:
+                                           BOARD_TEC_PRESSED);
 }
 
 

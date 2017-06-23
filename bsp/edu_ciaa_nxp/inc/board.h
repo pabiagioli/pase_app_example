@@ -74,6 +74,9 @@ typedef enum
 {
    BOARD_TEC_ID_1 = 0,
    BOARD_TEC_ID_2,
+   BOARD_TEC_ID_3,
+   BOARD_TEC_ID_4,
+   BOARD_TEC_ID_TOTAL,
 }board_switchId_enum;
 
 typedef enum
@@ -87,6 +90,7 @@ typedef enum
 /*==================[external functions declaration]=========================*/
 extern void board_init(void);
 extern void board_ledSet(board_ledId_enum id, board_ledState_enum state);
+extern void board_ledToggle(board_ledId_enum id);
 extern board_ledState_enum board_ledGet(board_ledId_enum id);
 extern board_switchState_enum board_switchGet(board_switchId_enum id);
 /*==================[cplusplus]==============================================*/

@@ -67,22 +67,35 @@ OSEK OSEK {
       SCHEDULE = NON;
    }
 
-   TASK InputEvTask1 {
-      PRIORITY = 2;
+   TASK UserTask {
+      PRIORITY = 1;
       ACTIVATION = 1;
       STACK = 512;
       TYPE = BASIC;
       SCHEDULE = NON;
    }
 
-   TASK InputEvTask2 {
+	TASK KeyboardTask {
       PRIORITY = 2;
       ACTIVATION = 1;
       STACK = 512;
       TYPE = BASIC;
       SCHEDULE = NON;
    }
+   
+   ALARM ActivateKeyboardTask {
+      COUNTER = HardwareCounter;
+      ACTION = ACTIVATETASK {
+         TASK = KeyboardTask;
+      }
+   }
 
+	ALARM ActivateUserTask {
+      COUNTER = HardwareCounter;
+      ACTION = ACTIVATETASK {
+         TASK = UserTask;
+      }
+   }
    COUNTER HardwareCounter {
       MAXALLOWEDVALUE = 1000;
       TICKSPERBASE = 1;
@@ -91,44 +104,4 @@ OSEK OSEK {
       COUNTER = HWCOUNTER0;
    }
 
-   ISR GPIOINTHandler0 {
-      INTERRUPT = GPIO0;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler1 {
-      INTERRUPT = GPIO1;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler2 {
-      INTERRUPT = GPIO2;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler3 {
-      INTERRUPT = GPIO3;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler4 {
-      INTERRUPT = GPIO4;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler5 {
-      INTERRUPT = GPIO5;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler6 {
-      INTERRUPT = GPIO6;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler7 {
-      INTERRUPT = GPIO7;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
 };
