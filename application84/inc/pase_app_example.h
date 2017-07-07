@@ -46,10 +46,19 @@
  ** @{ */
 
 /*==================[inclusions]=============================================*/
-
+#include "stdint.h"
 /*==================[macros]=================================================*/
 
 /*==================[typedef]================================================*/
+typedef enum {RED = 0, GREEN, BLUE} led_enum;
+typedef enum {PLAYING = 0, PAUSED, STOPPED, FAILURE, IDLE} playerState_enum;
+
+typedef struct {
+	led_enum currentLED;
+	playerState_enum status;
+	uint32_t dcycle;
+}fsm;
+
 
 /*==================[external data declaration]==============================*/
 
