@@ -132,9 +132,9 @@ TASK(InitTask)
          MCU_GPIO_EVENT_TYPE_INPUT_RISING_EDGE,
          eventInput2_callBack);
 
-   configPWM(2,1/1000);
-   configPWM(5,1/1000);
-   configPWM(4,1/1000);
+   configPWM(2,1000);
+   configPWM(5,1000);
+   configPWM(4,1000);
 
    mcu_pwm_start();
 
