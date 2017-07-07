@@ -16,6 +16,9 @@ extern "C" {
 
 
 /*==================[external data declaration]==============================*/
+extern void mcu_pwm_init(void);
+extern void mcu_pwm_config(mcu_gpio_pinId_enum pin, uint32_t period);
+extern void mcu_pwm_setDutyCicle(uint32_t duty);
 
 /*==================[external functions declaration]=========================*/
 
