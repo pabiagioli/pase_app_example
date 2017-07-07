@@ -33,5 +33,5 @@ extern void mcu_pwm_start(void){
 }
 
 extern void mcu_pwm_setDutyCicle(uint32_t duty){
-	Chip_SCTPWM_SetDutyCycle(LPC_SCT,1,duty);
+	Chip_SCTPWM_SetDutyCycle(LPC_SCT,1, Chip_SCTPWM_PercentageToTicks(duty));
 }
