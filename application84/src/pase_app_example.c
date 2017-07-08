@@ -66,12 +66,12 @@ static fsm StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0, 
 /*==================[internal functions definition]==========================*/
 static void eventInput1_callBack(mcu_gpio_pinId_enum id, mcu_gpio_eventTypeInput_enum evType)
 {
-   SetEvent(InputEvTask1, evTask);
+   SetEvent(PlayStopPlayerTask, evPlayStopPlayerTask);
 }
 
 static void eventInput2_callBack(mcu_gpio_pinId_enum id, mcu_gpio_eventTypeInput_enum evType)
 {
-   SetEvent(InputEvTask2, evTask);
+   SetEvent(PauseResumePlayerTask, evPauseResumePlayerTask);
 }
 
 /*==================[external functions definition]==========================*/
