@@ -140,6 +140,9 @@ TASK(InitTask)
 
    mcu_pwm_start();
 
+   SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
+   SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
+
    TerminateTask();
 }
 
