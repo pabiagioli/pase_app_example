@@ -146,13 +146,27 @@ TASK(InitTask)
    TerminateTask();
 }
 
-TASK(InputEvTask1)
+TASK(PlayStopPlayerTask)
 {
    while (1)
    {
-      WaitEvent(evTask);
-      ClearEvent(evTask);
-      bsp_ledAction(BOARD_LED_ID_1, BSP_LED_ACTION_TOGGLE);
+      WaitEvent(evPlayStopPlayerTask);
+      ClearEvent(evPlayStopPlayerTask);
+      switch(StateMachine.fsm_status)
+      {
+      case PLAYER_IDLE:
+    	  StateMachine.fsm_status = PLAYER_PLAYING;
+    	  printf("Inicio Secuencia\n");
+    	  break;
+      case PLAYER_PLAYING:
+    	  StateMachine.fsm_status = PLAYER_STOPPED;
+    	  printf("Secuencia Finalizada\n");
+    	  break;
+      case PLAYER_STOPPED:
+		  StateMachine.fsm_status = PLAYER_PLAYING;
+		  printf("Inicio Secuencia\n");
+		  break;
+      }
    }
 }
 
