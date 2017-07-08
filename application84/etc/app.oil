@@ -55,7 +55,8 @@ OSEK OSEK {
    };
 
    APPMODE = AppMode1;
-   EVENT = evTask;
+	EVENT = evPlayStopPlayerTask;
+	EVENT = evPauseResumePlayerTask;
 
    TASK InitTask {
       PRIORITY = 10;
