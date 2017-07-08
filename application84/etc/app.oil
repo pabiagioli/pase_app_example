@@ -41,129 +41,167 @@
 /*  - OSEK OIL standard: http://portal.osek-vdx.org/files/pdf/specs/oil25.pdf*/
 /*****************************************************************************/
 
-OSEK OSEK {
+OSEK OSEK
+{
+	OS ExampleOS
+	{
+		STATUS = EXTENDED;
+		ERRORHOOK = TRUE;
+		PRETASKHOOK = FALSE;
+		POSTTASKHOOK = FALSE;
+		STARTUPHOOK = FALSE;
+		SHUTDOWNHOOK = FALSE;
+		USERESSCHEDULER = FALSE;
+		MEMMAP = FALSE;
+	};
 
-   OS	ExampleOS {
-      STATUS = EXTENDED;
-      ERRORHOOK = TRUE;
-      PRETASKHOOK = FALSE;
-      POSTTASKHOOK = FALSE;
-      STARTUPHOOK = FALSE;
-      SHUTDOWNHOOK = FALSE;
-      USERESSCHEDULER = FALSE;
-      MEMMAP = FALSE;
-   };
-
-   APPMODE = AppMode1;
+	APPMODE = AppMode1;
+	
+	/* Events used in the application */
 	EVENT = evPlayStopPlayerTask;
 	EVENT = evPauseResumePlayerTask;
 
-   TASK InitTask {
-      PRIORITY = 10;
-      ACTIVATION = 1;
-      AUTOSTART = TRUE {
-         APPMODE = AppMode1;
-      }
-      STACK = 512;
-      TYPE = EXTENDED;
-      SCHEDULE = NON;
-   }
+	/* Tasks definitions */
+	
+	TASK InitTask
+	{
+		PRIORITY = 10;
+		ACTIVATION = 1;
+		AUTOSTART = TRUE
+		{
+			APPMODE = AppMode1;
+		}
+		STACK = 512;
+		TYPE = EXTENDED;
+		SCHEDULE = NON;
+	}
    
-    ALARM ActivateTimeStampTask {
-      COUNTER = HardwareCounter;
-      ACTION = ACTIVATETASK {
-         TASK = TimeStampTask;
-      }
-   }
+	TASK TimeStampTask
+	{
+		PRIORITY = 20;
+		ACTIVATION = 1;
+		AUTOSTART = TRUE
+		{
+			APPMODE = AppMode1;
+		}
+		STACK = 512;
+		TYPE = EXTENDED;
+		SCHEDULE = NON;
+	}
+
+	TASK PlayStopPlayerTask
+	{
+		PRIORITY = 2;
+		ACTIVATION = 1;
+		AUTOSTART = TRUE
+		{
+			APPMODE = AppMode1;
+		}
+		STACK = 512;
+		TYPE = EXTENDED;
+		EVENT = evPlayStopPlayerTask;
+		SCHEDULE = NON;
+	}
+
+	TASK PauseResumePlayerTask
+	{
+		PRIORITY = 2;
+		ACTIVATION = 1;
+		AUTOSTART = TRUE
+		{
+			APPMODE = AppMode1;
+		}
+		STACK = 512;
+		TYPE = EXTENDED;
+		EVENT = evPauseResumePlayerTask;
+		SCHEDULE = NON;
+	}
+	
+	/* Alarm Declarations */
+	
+	ALARM ActivateTimeStampTask
+	{
+		COUNTER = HardwareCounter;
+		ACTION = ACTIVATETASK
+		{
+			TASK = TimeStampTask;
+      	}
+   	}
    
-       ALARM ActivateRampTask {
-      COUNTER = HardwareCounter;
-      ACTION = ACTIVATETASK {
-         TASK = TimeStampTask;
-      }
-   }
-   
-   TASK TimeStampTask {
-      PRIORITY = 20;
-      ACTIVATION = 1;
-      AUTOSTART = TRUE {
-         APPMODE = AppMode1;
-      }
-      STACK = 512;
-      TYPE = EXTENDED;
-      SCHEDULE = NON;
-   }
+	ALARM ActivateRampTask
+	{
+		COUNTER = HardwareCounter;
+		ACTION = ACTIVATETASK
+		{
+			TASK = TimeStampTask;
+		}
+	}
 
-   TASK PlayStopPlayerTask {
-      PRIORITY = 2;
-      ACTIVATION = 1;
-      AUTOSTART = TRUE {
-         APPMODE = AppMode1;
-      }
-      STACK = 512;
-      TYPE = EXTENDED;
-      EVENT = evPlayStopPlayerTask;
-      SCHEDULE = NON;
-   }
+	COUNTER HardwareCounter
+	{
+		MAXALLOWEDVALUE = 1000;
+		TICKSPERBASE = 1;
+		MINCYCLE = 1;
+		TYPE = HARDWARE;
+		COUNTER = HWCOUNTER0;
+	}
 
-   TASK PauseResumePlayerTask {
-      PRIORITY = 2;
-      ACTIVATION = 1;
-      AUTOSTART = TRUE {
-         APPMODE = AppMode1;
-      }
-      STACK = 512;
-      TYPE = EXTENDED;
-      EVENT = evPauseResumePlayerTask;
-      SCHEDULE = NON;
-   }
-
-   COUNTER HardwareCounter {
-      MAXALLOWEDVALUE = 1000;
-      TICKSPERBASE = 1;
-      MINCYCLE = 1;
-      TYPE = HARDWARE;
-      COUNTER = HWCOUNTER0;
-   }
-
-   ISR GPIOINTHandler0 {
-      INTERRUPT = GPIO0;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler1 {
-      INTERRUPT = GPIO1;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler2 {
-      INTERRUPT = GPIO2;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler3 {
-      INTERRUPT = GPIO3;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler4 {
-      INTERRUPT = GPIO4;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler5 {
-      INTERRUPT = GPIO5;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler6 {
-      INTERRUPT = GPIO6;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
-   ISR GPIOINTHandler7 {
-      INTERRUPT = GPIO7;
-	  CATEGORY = 2;
-	  PRIORITY = 0;
-   };
+	/* Interruptions used un the application */
+	
+	ISR GPIOINTHandler0
+	{
+		INTERRUPT = GPIO0;
+		CATEGORY = 2;
+		PRIORITY = 0;
+	};
+	
+	ISR GPIOINTHandler1
+	{
+		INTERRUPT = GPIO1;
+		CATEGORY = 2;
+		PRIORITY = 0;
+	};
+	
+	ISR GPIOINTHandler2
+	{
+		INTERRUPT = GPIO2;
+		CATEGORY = 2;
+		PRIORITY = 0;
+	};
+	
+	ISR GPIOINTHandler3
+	{
+		INTERRUPT = GPIO3;
+		CATEGORY = 2;
+		PRIORITY = 0;
+	};
+	
+	ISR GPIOINTHandler4
+	{
+		INTERRUPT = GPIO4;
+		CATEGORY = 2;
+		PRIORITY = 0;
+	};
+	
+	ISR GPIOINTHandler5
+	{
+		INTERRUPT = GPIO5;
+		CATEGORY = 2;
+		PRIORITY = 0;
+	};
+	
+	ISR GPIOINTHandler6
+	{
+		INTERRUPT = GPIO6;
+		CATEGORY = 2;
+		PRIORITY = 0;
+	};
+	
+	ISR GPIOINTHandler7
+	{
+		INTERRUPT = GPIO7;
+		CATEGORY = 2;
+		PRIORITY = 0;
+	};
+	
 };
