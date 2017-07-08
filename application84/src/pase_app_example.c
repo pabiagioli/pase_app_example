@@ -192,6 +192,11 @@ TASK(PauseResumePlayerTask)
    }
 }
 
+TASK(TimeStampTask)
+{
+	TimeStampCounter++;
+}
+
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
