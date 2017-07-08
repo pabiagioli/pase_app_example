@@ -50,8 +50,9 @@
 #include "mcu.h"
 
 /*==================[macros and definitions]=================================*/
-#define FIRST_START_DELAY_MS 350
-#define PERIOD_MS 250
+#define FIRST_START_DELAY_MS 0
+#define PERIOD_TIMESTAMP_MS 1
+#define PERIOD_RAMP_MS 20
 
 /*==================[internal data declaration]==============================*/
 
