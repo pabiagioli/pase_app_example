@@ -188,6 +188,8 @@ TASK(PauseResumePlayerTask)
 			StateMachine.fsm_status = PLAYER_PLAYING;
 			printf("Secuencia Reanudada\n");
 			break;
+		case PLAYER_STOPPED:
+			break;
 		}
 	}
 }
