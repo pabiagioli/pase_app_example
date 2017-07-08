@@ -114,7 +114,7 @@ OSEK OSEK {
       }
       STACK = 512;
       TYPE = EXTENDED;
-      EVENT = evTask;
+      EVENT = evPauseResumePlayerTask;
       SCHEDULE = NON;
    }
 
