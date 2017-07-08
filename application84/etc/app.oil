@@ -68,8 +68,33 @@ OSEK OSEK {
       TYPE = EXTENDED;
       SCHEDULE = NON;
    }
+   
+    ALARM ActivateTimeStampTask {
+      COUNTER = HardwareCounter;
+      ACTION = ACTIVATETASK {
+         TASK = TimeStampTask;
+      }
+   }
+   
+       ALARM ActivateRampTask {
+      COUNTER = HardwareCounter;
+      ACTION = ACTIVATETASK {
+         TASK = TimeStampTask;
+      }
+   }
+   
+   TASK TimeStampTask {
+      PRIORITY = 20;
+      ACTIVATION = 1;
+      AUTOSTART = TRUE {
+         APPMODE = AppMode1;
+      }
+      STACK = 512;
+      TYPE = EXTENDED;
+      SCHEDULE = NON;
+   }
 
-   TASK InputEvTask1 {
+   TASK PlayStopPlayerTask {
       PRIORITY = 2;
       ACTIVATION = 1;
       AUTOSTART = TRUE {
@@ -77,11 +102,11 @@ OSEK OSEK {
       }
       STACK = 512;
       TYPE = EXTENDED;
-      EVENT = evTask;
+      EVENT = evPlayStopPlayerTask;
       SCHEDULE = NON;
    }
 
-   TASK InputEvTask2 {
+   TASK PauseResumePlayerTask {
       PRIORITY = 2;
       ACTIVATION = 1;
       AUTOSTART = TRUE {
