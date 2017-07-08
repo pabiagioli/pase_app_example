@@ -55,7 +55,8 @@
 #define PERIOD_RAMP_MS 20
 
 /*==================[internal data declaration]==============================*/
-
+static uint32_t TimeStampCounter = 0;
+static fsm StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0, .direction = 0};
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
