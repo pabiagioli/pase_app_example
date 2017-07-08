@@ -66,12 +66,12 @@ static fsm StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0, 
 /*==================[internal functions definition]==========================*/
 static void eventInput1_callBack(mcu_gpio_pinId_enum id, mcu_gpio_eventTypeInput_enum evType)
 {
-   SetEvent(PlayStopPlayerTask, evPlayStopPlayerTask);
+	SetEvent(PlayStopPlayerTask, evPlayStopPlayerTask);
 }
 
 static void eventInput2_callBack(mcu_gpio_pinId_enum id, mcu_gpio_eventTypeInput_enum evType)
 {
-   SetEvent(PauseResumePlayerTask, evPauseResumePlayerTask);
+	SetEvent(PauseResumePlayerTask, evPauseResumePlayerTask);
 }
 
 /*==================[external functions definition]==========================*/
@@ -86,13 +86,13 @@ static void eventInput2_callBack(mcu_gpio_pinId_enum id, mcu_gpio_eventTypeInput
  */
 int main(void)
 {
-   /* Starts the operating system in the Application Mode 1 */
-   /* This example has only one Application Mode */
-   StartOS(AppMode1);
+	/* Starts the operating system in the Application Mode 1 */
+	/* This example has only one Application Mode */
+	StartOS(AppMode1);
 
-   /* StartOs shall never returns, but to avoid compiler warnings or errors
-    * 0 is returned */
-   return 0;
+	/* StartOs shall never returns, but to avoid compiler warnings or errors
+	 * 0 is returned */
+	return 0;
 }
 
 /** \brief Error Hook function
@@ -115,7 +115,7 @@ int main(void)
  */
 void ErrorHook(void)
 {
-   ShutdownOS(0);
+	ShutdownOS(0);
 }
 
 /** \brief Initial task
@@ -124,72 +124,72 @@ void ErrorHook(void)
  */
 TASK(InitTask)
 {
-   bsp_init();
+	bsp_init();
 
-   mcu_gpio_setEventInput(MCU_GPIO_PIN_ID_38,
-         MCU_GPIO_EVENT_TYPE_INPUT_FALLING_EDGE,
-         eventInput1_callBack);
+	mcu_gpio_setEventInput( MCU_GPIO_PIN_ID_38,
+							MCU_GPIO_EVENT_TYPE_INPUT_FALLING_EDGE,
+							eventInput1_callBack);
 
-   mcu_gpio_setEventInput(MCU_GPIO_PIN_ID_42,
-         MCU_GPIO_EVENT_TYPE_INPUT_RISING_EDGE,
-         eventInput2_callBack);
+	mcu_gpio_setEventInput( MCU_GPIO_PIN_ID_42,
+							MCU_GPIO_EVENT_TYPE_INPUT_RISING_EDGE,
+							eventInput2_callBack);
 
-   configPWM(2,1000);
-   configPWM(5,1000);
-   configPWM(4,1000);
+	configPWM(2,1000);
+	configPWM(5,1000);
+	configPWM(4,1000);
 
-   mcu_pwm_start();
+	mcu_pwm_start();
 
-   SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
-   SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
+	SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
+	SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
 
-   TerminateTask();
+	TerminateTask();
 }
 
 TASK(PlayStopPlayerTask)
 {
-   while (1)
-   {
-      WaitEvent(evPlayStopPlayerTask);
-      ClearEvent(evPlayStopPlayerTask);
-      switch(StateMachine.fsm_status)
-      {
-      case PLAYER_IDLE:
-    	  StateMachine.fsm_status = PLAYER_PLAYING;
-    	  printf("Inicio Secuencia\n");
-    	  break;
-      case PLAYER_PLAYING:
-    	  StateMachine.fsm_status = PLAYER_STOPPED;
-    	  printf("Secuencia Finalizada\n");
-    	  break;
-      case PLAYER_STOPPED:
-		  StateMachine.fsm_status = PLAYER_PLAYING;
-		  printf("Inicio Secuencia\n");
-		  break;
-      }
-   }
+	while (1)
+	{
+		WaitEvent(evPlayStopPlayerTask);
+		ClearEvent(evPlayStopPlayerTask);
+		switch(StateMachine.fsm_status)
+		{
+			case PLAYER_IDLE:
+				StateMachine.fsm_status = PLAYER_PLAYING;
+				printf("Inicio Secuencia\n");
+				break;
+			case PLAYER_PLAYING:
+				StateMachine.fsm_status = PLAYER_STOPPED;
+				printf("Secuencia Finalizada\n");
+				break;
+			case PLAYER_STOPPED:
+				StateMachine.fsm_status = PLAYER_PLAYING;
+				printf("Inicio Secuencia\n");
+				break;
+		}
+	}
 }
 
 TASK(PauseResumePlayerTask)
 {
 	while (1)
 	{
-	WaitEvent(evPauseResumePlayerTask);
-      ClearEvent(evPauseResumePlayerTask);
-      switch(StateMachine.fsm_status)
-      {
+		WaitEvent(evPauseResumePlayerTask);
+		ClearEvent(evPauseResumePlayerTask);
+		switch(StateMachine.fsm_status)
+		{
 		case PLAYER_IDLE:
-			  break;
+			break;
 		case PLAYER_PLAYING:
-			  StateMachine.fsm_status = PLAYER_PAUSED;
-			  printf("Secuencia Pausada\n");
-			  break;
+			StateMachine.fsm_status = PLAYER_PAUSED;
+			printf("Secuencia Pausada\n");
+			break;
 		case PLAYER_PAUSED:
-			  StateMachine.fsm_status = PLAYER_PLAYING;
-			  printf("Secuencia Reanudada\n");
-			  break;
-}
-   }
+			StateMachine.fsm_status = PLAYER_PLAYING;
+			printf("Secuencia Reanudada\n");
+			break;
+		}
+	}
 }
 
 TASK(TimeStampTask)
