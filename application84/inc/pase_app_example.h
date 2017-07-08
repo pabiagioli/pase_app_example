@@ -51,12 +51,13 @@
 
 /*==================[typedef]================================================*/
 typedef enum {RED = 0, GREEN, BLUE} led_enum;
-typedef enum {PLAYING = 0, PAUSED, STOPPED, FAILURE, IDLE} playerState_enum;
+typedef enum {PLAYER_PLAYING = 0, PLAYER_PAUSED, PLAYER_STOPPED, PLAYER_FAILURE, PLAYER_IDLE} playerState_enum;
 
 typedef struct {
 	led_enum currentLED;
-	playerState_enum status;
+	playerState_enum fsm_status;
 	uint32_t dcycle;
+	uint8_t direction;
 }fsm;
 
 
