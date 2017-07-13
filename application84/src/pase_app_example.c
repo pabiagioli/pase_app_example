@@ -52,7 +52,7 @@
 /*==================[macros and definitions]=================================*/
 #define FIRST_START_DELAY_MS 350
 #define PERIOD_MS 250
-
+#define BAUD_RATE_UART 115200
 /*==================[internal data declaration]==============================*/
 
 /*==================[internal functions declaration]=========================*/
@@ -131,6 +131,8 @@ TASK(InitTask)
    mcu_gpio_setEventInput(MCU_GPIO_PIN_ID_42,
          MCU_GPIO_EVENT_TYPE_INPUT_RISING_EDGE,
          eventInput2_callBack);
+
+   uartConfig(UART_USB, BAUD_RATE_UART);
 
    configPWM(2,1000);
    configPWM(5,1000);
