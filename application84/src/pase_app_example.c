@@ -50,16 +50,13 @@
 #include "mcu.h"
 
 /*==================[macros and definitions]=================================*/
-<<<<<<< HEAD
+
 #define FIRST_START_DELAY_MS 0
 #define PERIOD_TIMESTAMP_MS 1
 #define PERIOD_RAMP_MS 20
-
-=======
 #define FIRST_START_DELAY_MS 350
-#define PERIOD_MS 250
 #define BAUD_RATE_UART 115200
->>>>>>> mcu_uart
+
 /*==================[internal data declaration]==============================*/
 static uint32_t TimeStampCounter = 0;
 static fsm StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0, .direction = 0};
