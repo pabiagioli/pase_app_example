@@ -41,10 +41,9 @@
 /*  - OSEK OIL standard: http://portal.osek-vdx.org/files/pdf/specs/oil25.pdf*/
 /*****************************************************************************/
 
-OSEK OSEK
-{
-	OS ExampleOS
-	{
+OSEK OSEK {
+
+	OS ExampleOS {
 		STATUS = EXTENDED;
 		ERRORHOOK = TRUE;
 		PRETASKHOOK = FALSE;
@@ -58,17 +57,15 @@ OSEK OSEK
 	APPMODE = AppMode1;
 	
 	/* Events used in the application */
-	EVENT = evPlayStopPlayerTask;
-	EVENT = evPauseResumePlayerTask;
+	EVENT = evPlayStopTask;
+	EVENT = evPauseResumeTask;
 
 	/* Tasks definitions */
 	
-	TASK InitTask
-	{
+	TASK InitTask {
 		PRIORITY = 10;
 		ACTIVATION = 1;
-		AUTOSTART = TRUE
-		{
+		AUTOSTART = TRUE {
 			APPMODE = AppMode1;
 		}
 		STACK = 512;
@@ -76,12 +73,10 @@ OSEK OSEK
 		SCHEDULE = NON;
 	}
    
-	TASK TimeStampTask
-	{
+	TASK TimeStampTask {
 		PRIORITY = 20;
 		ACTIVATION = 1;
-		AUTOSTART = TRUE
-		{
+		AUTOSTART = TRUE {
 			APPMODE = AppMode1;
 		}
 		STACK = 512;
@@ -89,56 +84,47 @@ OSEK OSEK
 		SCHEDULE = NON;
 	}
 
-	TASK PlayStopPlayerTask
-	{
+	TASK PlayStopTask {
 		PRIORITY = 2;
 		ACTIVATION = 1;
-		AUTOSTART = TRUE
-		{
+		AUTOSTART = TRUE {
 			APPMODE = AppMode1;
 		}
 		STACK = 512;
 		TYPE = EXTENDED;
-		EVENT = evPlayStopPlayerTask;
+		EVENT = evPlayStopTask;
 		SCHEDULE = NON;
 	}
 
-	TASK PauseResumePlayerTask
-	{
+	TASK PauseResumeTask {
 		PRIORITY = 2;
 		ACTIVATION = 1;
-		AUTOSTART = TRUE
-		{
+		AUTOSTART = TRUE {
 			APPMODE = AppMode1;
 		}
 		STACK = 512;
 		TYPE = EXTENDED;
-		EVENT = evPauseResumePlayerTask;
+		EVENT = evPauseResumeTask;
 		SCHEDULE = NON;
 	}
 	
 	/* Alarm Declarations */
 	
-	ALARM ActivateTimeStampTask
-	{
+	ALARM ActivateTimeStampTask {
 		COUNTER = HardwareCounter;
-		ACTION = ACTIVATETASK
-		{
+		ACTION = ACTIVATETASK {
 			TASK = TimeStampTask;
       	}
    	}
    
-	ALARM ActivateRampTask
-	{
+	ALARM ActivateRampTask {
 		COUNTER = HardwareCounter;
-		ACTION = ACTIVATETASK
-		{
+		ACTION = ACTIVATETASK {
 			TASK = TimeStampTask;
 		}
 	}
 
-	COUNTER HardwareCounter
-	{
+	COUNTER HardwareCounter {
 		MAXALLOWEDVALUE = 1000;
 		TICKSPERBASE = 1;
 		MINCYCLE = 1;
@@ -148,57 +134,49 @@ OSEK OSEK
 
 	/* Interruptions used un the application */
 	
-	ISR GPIOINTHandler0
-	{
+	ISR GPIOINTHandler0 {
 		INTERRUPT = GPIO0;
 		CATEGORY = 2;
 		PRIORITY = 0;
 	};
 	
-	ISR GPIOINTHandler1
-	{
+	ISR GPIOINTHandler1 {
 		INTERRUPT = GPIO1;
 		CATEGORY = 2;
 		PRIORITY = 0;
 	};
 	
-	ISR GPIOINTHandler2
-	{
+	ISR GPIOINTHandler2 {
 		INTERRUPT = GPIO2;
 		CATEGORY = 2;
 		PRIORITY = 0;
 	};
 	
-	ISR GPIOINTHandler3
-	{
+	ISR GPIOINTHandler3 {
 		INTERRUPT = GPIO3;
 		CATEGORY = 2;
 		PRIORITY = 0;
 	};
 	
-	ISR GPIOINTHandler4
-	{
+	ISR GPIOINTHandler4 {
 		INTERRUPT = GPIO4;
 		CATEGORY = 2;
 		PRIORITY = 0;
 	};
 	
-	ISR GPIOINTHandler5
-	{
+	ISR GPIOINTHandler5 {
 		INTERRUPT = GPIO5;
 		CATEGORY = 2;
 		PRIORITY = 0;
 	};
 	
-	ISR GPIOINTHandler6
-	{
+	ISR GPIOINTHandler6 {
 		INTERRUPT = GPIO6;
 		CATEGORY = 2;
 		PRIORITY = 0;
 	};
 	
-	ISR GPIOINTHandler7
-	{
+	ISR GPIOINTHandler7 {
 		INTERRUPT = GPIO7;
 		CATEGORY = 2;
 		PRIORITY = 0;
