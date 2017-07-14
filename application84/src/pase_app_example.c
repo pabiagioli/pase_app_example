@@ -50,9 +50,12 @@
 #include "mcu.h"
 
 /*==================[macros and definitions]=================================*/
+
 #define FIRST_START_DELAY_MS 0
 #define PERIOD_TIMESTAMP_MS 1
 #define PERIOD_RAMP_MS 20
+#define FIRST_START_DELAY_MS 350
+#define BAUD_RATE_UART 115200
 
 /*==================[internal data declaration]==============================*/
 static uint32_t TimeStampCounter = 0;
@@ -133,6 +136,8 @@ TASK(InitTask)
 	mcu_gpio_setEventInput( MCU_GPIO_PIN_ID_42,
 							MCU_GPIO_EVENT_TYPE_INPUT_RISING_EDGE,
 							eventInput2_callBack);
+
+	uartConfig(UART_USB, BAUD_RATE_UART);
 
 	configPWM(2,1000);
 	configPWM(5,1000);
