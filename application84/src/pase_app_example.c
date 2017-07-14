@@ -69,12 +69,14 @@ static fsm StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0, 
 /*==================[internal functions definition]==========================*/
 static void eventInput1_callBack(mcu_gpio_pinId_enum id, mcu_gpio_eventTypeInput_enum evType)
 {
-	SetEvent(PlayStopPlayerTask, evPlayStopPlayerTask);
+	SetEvent(PlayStopTask, evPlayStopTask);
+	//SetEvent(InputEvTask1, evTask);
 }
 
 static void eventInput2_callBack(mcu_gpio_pinId_enum id, mcu_gpio_eventTypeInput_enum evType)
 {
-	SetEvent(PauseResumePlayerTask, evPauseResumePlayerTask);
+	SetEvent(PauseResumeTask, evPauseResumeTask);
+	//SetEvent(InputEvTask2, evTask);
 }
 
 /*==================[external functions definition]==========================*/
@@ -145,53 +147,53 @@ TASK(InitTask)
 
 	mcu_pwm_start();
 
-	SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
-	SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
+	//SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
+	//SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
 
 	TerminateTask();
 }
 
-TASK(PlayStopPlayerTask)
+TASK(PlayStopTask)
 {
 	while (1)
 	{
-		WaitEvent(evPlayStopPlayerTask);
-		ClearEvent(evPlayStopPlayerTask);
+		//WaitEvent(evPlayStopTask);
+		//ClearEvent(evPlayStopTask);
 		switch(StateMachine.fsm_status)
 		{
 			case PLAYER_IDLE:
 				StateMachine.fsm_status = PLAYER_PLAYING;
-				printf("Inicio Secuencia\n");
+				uartWriteString(UART_USB,"Inicio Secuencia\n");
 				break;
 			case PLAYER_PLAYING:
 				StateMachine.fsm_status = PLAYER_STOPPED;
-				printf("Secuencia Finalizada\n");
+				uartWriteString(UART_USB,"Secuencia Finalizada\n");
 				break;
 			case PLAYER_STOPPED:
 				StateMachine.fsm_status = PLAYER_PLAYING;
-				printf("Inicio Secuencia\n");
+				uartWriteString(UART_USB,"Inicio Secuencia\n");
 				break;
 		}
 	}
 }
 
-TASK(PauseResumePlayerTask)
+TASK(PauseResumeTask)
 {
 	while (1)
 	{
-		WaitEvent(evPauseResumePlayerTask);
-		ClearEvent(evPauseResumePlayerTask);
+		//WaitEvent(evPauseResumeTask);
+		//ClearEvent(evPauseResumeTask);
 		switch(StateMachine.fsm_status)
 		{
 		case PLAYER_IDLE:
 			break;
 		case PLAYER_PLAYING:
 			StateMachine.fsm_status = PLAYER_PAUSED;
-			printf("Secuencia Pausada\n");
+			uartWriteString(UART_USB,"Secuencia Pausada\n");
 			break;
 		case PLAYER_PAUSED:
 			StateMachine.fsm_status = PLAYER_PLAYING;
-			printf("Secuencia Reanudada\n");
+			uartWriteString(UART_USB,"Secuencia Reanudada\n");
 			break;
 		case PLAYER_STOPPED:
 			break;
