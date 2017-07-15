@@ -7,6 +7,7 @@
 
 #include "chip.h"
 #include "mcu_uart.h"
+#include <string.h>
 
 #define UART_485_LPC LPC_USART0  /* UART0 (RS485/Profibus) */
 #define UART_USB_LPC LPC_USART2  /* UART2 (USB-UART) */
@@ -106,11 +107,14 @@ void uartConfig( uartMap_t uart, uint32_t baudRate ){
    case UART_USB:
       Chip_UART_Init(UART_USB_LPC);
       Chip_UART_SetBaud(UART_USB_LPC, baudRate);  /* Set Baud rate */
-      Chip_UART_SetupFIFOS(UART_USB_LPC, UART_FCR_FIFO_EN | UART_FCR_TRG_LEV0); /* Modify FCR (FIFO Control Register)*/
+      Chip_UART_SetupFIFOS(UART_USB_LPC, UART_FCR_FIFO_EN | UART_FCR_TX_RS | UART_FCR_RX_RS | UART_FCR_TRG_LEV0); /* Modify FCR (FIFO Control Register)*/
       Chip_UART_TXEnable(UART_USB_LPC); /* Enable UART Transmission */
       Chip_SCU_PinMux(7, 1, MD_PDN, FUNC6);              /* P7_1,FUNC6: UART2_TXD */
       Chip_SCU_PinMux(7, 2, MD_PLN|MD_EZI|MD_ZI, FUNC6); /* P7_2,FUNC6: UART2_RXD */
-
+      /* disable THRE irq (TX) */
+      Chip_UART_IntDisable(UART_USB_LPC, UART_IER_THREINT);
+      /* disable RBR irq (RX) */
+      Chip_UART_IntDisable(UART_USB_LPC, UART_IER_RBRINT);
       //Enable UART Rx Interrupt
       //   Chip_UART_IntEnable(UART_USB_LPC,UART_IER_RBRINT );   //Receiver Buffer Register Interrupt
       // Enable UART line status interrupt
@@ -179,7 +183,7 @@ void uartWriteByte( uartMap_t uart, uint8_t byte ){
 
 
 void uartWriteString( uartMap_t uart, char* str ){
-   while(*str != 0){
+   while(*str != 0 || *str != '\0'){
 	  uartWriteByte( uart, (uint8_t)*str );
 	  str++;
    }

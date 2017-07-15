@@ -52,14 +52,16 @@
 /*==================[macros and definitions]=================================*/
 
 #define FIRST_START_DELAY_MS 0
-#define PERIOD_TIMESTAMP_MS 1
+#define PERIOD_TIMESTAMP_MS 1000
 #define PERIOD_RAMP_MS 20
 #define FIRST_START_DELAY_MS 350
 #define BAUD_RATE_UART 115200
 
 /*==================[internal data declaration]==============================*/
+uint8_t mensaje [100];
 static uint32_t TimeStampCounter = 0;
 static fsm StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0, .direction = 0};
+
 /*==================[internal functions declaration]=========================*/
 
 /*==================[internal data definition]===============================*/
@@ -70,13 +72,11 @@ static fsm StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0, 
 static void eventInput1_callBack(mcu_gpio_pinId_enum id, mcu_gpio_eventTypeInput_enum evType)
 {
 	SetEvent(PlayStopTask, evPlayStopTask);
-	//SetEvent(InputEvTask1, evTask);
 }
 
 static void eventInput2_callBack(mcu_gpio_pinId_enum id, mcu_gpio_eventTypeInput_enum evType)
 {
 	SetEvent(PauseResumeTask, evPauseResumeTask);
-	//SetEvent(InputEvTask2, evTask);
 }
 
 /*==================[external functions definition]==========================*/
@@ -147,7 +147,7 @@ TASK(InitTask)
 
 	mcu_pwm_start();
 
-	//SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
+	SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
 	//SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
 
 	TerminateTask();
@@ -157,51 +157,65 @@ TASK(PlayStopTask)
 {
 	while (1)
 	{
-		//WaitEvent(evPlayStopTask);
-		//ClearEvent(evPlayStopTask);
+		WaitEvent(evPlayStopTask);
+		ClearEvent(evPlayStopTask);
+		GetResource(UARTRES);
 		switch(StateMachine.fsm_status)
 		{
 			case PLAYER_IDLE:
 				StateMachine.fsm_status = PLAYER_PLAYING;
-				uartWriteString(UART_USB,"Inicio Secuencia\n");
+				sprintf(mensaje, "%u Inicio Secuencia\n", TimeStampCounter);
+				uartWriteString(UART_USB,mensaje);
 				break;
 			case PLAYER_PLAYING:
 				StateMachine.fsm_status = PLAYER_STOPPED;
-				uartWriteString(UART_USB,"Secuencia Finalizada\n");
+				sprintf(mensaje, "%u Secuencia Finalizada\n", TimeStampCounter);
+				uartWriteString(UART_USB,mensaje);
 				break;
 			case PLAYER_STOPPED:
 				StateMachine.fsm_status = PLAYER_PLAYING;
-				uartWriteString(UART_USB,"Inicio Secuencia\n");
+				sprintf(mensaje, "%u Inicio Secuencia\n", TimeStampCounter);
+				uartWriteString(UART_USB,mensaje);
 				break;
 		}
+		ReleaseResource(UARTRES);
+		WaitEvent(evPlayStopTask);
 	}
+
 }
 
 TASK(PauseResumeTask)
 {
 	while (1)
 	{
-		//WaitEvent(evPauseResumeTask);
-		//ClearEvent(evPauseResumeTask);
+		WaitEvent(evPauseResumeTask);
+		ClearEvent(evPauseResumeTask);
+		GetResource(UARTRES);
 		switch(StateMachine.fsm_status)
 		{
 		case PLAYER_IDLE:
 			break;
 		case PLAYER_PLAYING:
 			StateMachine.fsm_status = PLAYER_PAUSED;
-			uartWriteString(UART_USB,"Secuencia Pausada\n");
+			sprintf(mensaje, "%u Secuencia Pausada\n", TimeStampCounter);
+			uartWriteString(UART_USB,mensaje);
 			break;
 		case PLAYER_PAUSED:
 			StateMachine.fsm_status = PLAYER_PLAYING;
-			uartWriteString(UART_USB,"Secuencia Reanudada\n");
+			sprintf(mensaje, "%u Secuencia Reanudada\n", TimeStampCounter);
+			uartWriteString(UART_USB,mensaje);
 			break;
 		}
+		ReleaseResource(UARTRES);
+		WaitEvent(evPauseResumeTask);
 	}
+
 }
 
 TASK(TimeStampTask)
 {
 	TimeStampCounter++;
+	TerminateTask();
 }
 
 /** @} doxygen end group definition */

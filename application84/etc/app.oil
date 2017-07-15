@@ -56,6 +56,8 @@ OSEK OSEK {
 
 	APPMODE = AppMode1;
 	
+	RESOURCE=UARTRES;
+
 	/* Events used in the application */
 	EVENT = evPlayStopTask;
 	EVENT = evPauseResumeTask;
@@ -63,25 +65,23 @@ OSEK OSEK {
 	/* Tasks definitions */
 	
 	TASK InitTask {
-		PRIORITY = 10;
+		PRIORITY = 50;
 		ACTIVATION = 1;
 		AUTOSTART = TRUE {
 			APPMODE = AppMode1;
 		}
-		STACK = 512;
+		STACK = 1024;
 		TYPE = EXTENDED;
 		SCHEDULE = NON;
 	}
    
 	TASK TimeStampTask {
-		PRIORITY = 20;
+		PRIORITY = 1;
 		ACTIVATION = 1;
-		AUTOSTART = TRUE {
-			APPMODE = AppMode1;
-		}
-		STACK = 512;
-		TYPE = EXTENDED;
-		SCHEDULE = NON;
+		AUTOSTART = FALSE;
+		STACK = 1024;
+		TYPE = BASIC;
+		SCHEDULE = FULL;
 	}
 
 	TASK PlayStopTask {
@@ -90,9 +90,10 @@ OSEK OSEK {
 		AUTOSTART = TRUE {
 			APPMODE = AppMode1;
 		}
-		STACK = 512;
+		STACK = 1024;
 		TYPE = EXTENDED;
 		EVENT = evPlayStopTask;
+		RESOURCE=UARTRES;
 		SCHEDULE = NON;
 	}
 
@@ -102,9 +103,10 @@ OSEK OSEK {
 		AUTOSTART = TRUE {
 			APPMODE = AppMode1;
 		}
-		STACK = 512;
+		STACK = 1024;
 		TYPE = EXTENDED;
 		EVENT = evPauseResumeTask;
+		RESOURCE=UARTRES;
 		SCHEDULE = NON;
 	}
 	
@@ -115,6 +117,7 @@ OSEK OSEK {
 		ACTION = ACTIVATETASK {
 			TASK = TimeStampTask;
       	}
+		AUTOSTART = FALSE;
    	}
    
 	ALARM ActivateRampTask {
