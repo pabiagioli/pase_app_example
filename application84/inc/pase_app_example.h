@@ -47,18 +47,21 @@
 
 /*==================[inclusions]=============================================*/
 #include "stdint.h"
+#include "mcu_pwm.h"
+
 /*==================[macros]=================================================*/
 
 /*==================[typedef]================================================*/
-typedef enum {RED = 0, GREEN, BLUE} led_enum;
-typedef enum {PLAYER_PLAYING = 0, PLAYER_PAUSED, PLAYER_STOPPED, PLAYER_FAILURE, PLAYER_IDLE} playerState_enum;
+typedef enum {RED = PWM7, GREEN = PWM8, BLUE = PWM9} led_enum_t;
+typedef enum {PLAYER_PLAYING = 0, PLAYER_PAUSED, PLAYER_STOPPED, PLAYER_FAILURE, PLAYER_IDLE} playerState_enum_t;
+typedef enum { UP, DOWN } direction_enum;
 
-typedef struct {
-	led_enum currentLED;
-	playerState_enum fsm_status;
+typedef struct fsm {
+	led_enum_t currentLED;
+	playerState_enum_t fsm_status;
 	uint32_t dcycle;
 	uint8_t direction;
-}fsm;
+} fsm_t;
 
 
 /*==================[external data declaration]==============================*/

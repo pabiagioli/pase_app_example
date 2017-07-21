@@ -60,7 +60,7 @@
 /*==================[internal data declaration]==============================*/
 uint8_t mensaje [100];
 static uint32_t TimeStampCounter = 0;
-static fsm StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0, .direction = 0};
+static fsm_t StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0, .direction = 0};
 
 /*==================[internal functions declaration]=========================*/
 
@@ -148,7 +148,6 @@ TASK(InitTask)
 	mcu_pwm_start();
 
 	SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
-	//SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
 
 	TerminateTask();
 }
@@ -165,17 +164,20 @@ TASK(PlayStopTask)
 			case PLAYER_IDLE:
 				StateMachine.fsm_status = PLAYER_PLAYING;
 				sprintf(mensaje, "%u Inicio Secuencia\n", TimeStampCounter);
-				uartWriteString(UART_USB,mensaje);
+				uartWriteString(UART_USB, mensaje);
+				SetRelAlarm(ActivateRampTask, 0, 100);
 				break;
 			case PLAYER_PLAYING:
 				StateMachine.fsm_status = PLAYER_STOPPED;
 				sprintf(mensaje, "%u Secuencia Finalizada\n", TimeStampCounter);
-				uartWriteString(UART_USB,mensaje);
+				uartWriteString(UART_USB, mensaje);
+				CancelAlarm(ActivateRampTask);
 				break;
 			case PLAYER_STOPPED:
 				StateMachine.fsm_status = PLAYER_PLAYING;
 				sprintf(mensaje, "%u Inicio Secuencia\n", TimeStampCounter);
-				uartWriteString(UART_USB,mensaje);
+				uartWriteString(UART_USB, mensaje);
+				SetRelAlarm(ActivateRampTask, 0, 100);
 				break;
 		}
 		ReleaseResource(UARTRES);
@@ -198,12 +200,14 @@ TASK(PauseResumeTask)
 		case PLAYER_PLAYING:
 			StateMachine.fsm_status = PLAYER_PAUSED;
 			sprintf(mensaje, "%u Secuencia Pausada\n", TimeStampCounter);
-			uartWriteString(UART_USB,mensaje);
+			uartWriteString(UART_USB, mensaje);
+			CancelAlarm(ActivateRampTask);
 			break;
 		case PLAYER_PAUSED:
 			StateMachine.fsm_status = PLAYER_PLAYING;
 			sprintf(mensaje, "%u Secuencia Reanudada\n", TimeStampCounter);
-			uartWriteString(UART_USB,mensaje);
+			uartWriteString(UART_USB, mensaje);
+			SetRelAlarm(ActivateRampTask, 0, 100);
 			break;
 		}
 		ReleaseResource(UARTRES);
@@ -218,8 +222,34 @@ TASK(TimeStampTask)
 	TerminateTask();
 }
 
+led_enum_t switchCurrentLed(fsm_t machine){
+	switch(machine.currentLED){
+		case RED:
+			return GREEN;
+		case GREEN:
+			return BLUE;
+		case BLUE:
+			return RED;
+		default:
+			return RED;
+	}
+}
+
+TASK(RampTask) {
+	StateMachine.dcycle += 10;
+	if(StateMachine.dcycle > 0 && StateMachine.dcycle < 100){
+		mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle);
+	} else if (StateMachine.dcycle > 100 && StateMachine.dcycle < 200){
+		mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle -(StateMachine.dcycle % 100));
+	} else {
+		StateMachine.dcycle = 0;
+		mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle);
+		StateMachine.currentLED = switchCurrentLed(StateMachine);
+	}
+	TerminateTask();
+}
+
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
-
