@@ -52,15 +52,19 @@
 /*==================[macros and definitions]=================================*/
 
 #define FIRST_START_DELAY_MS 0
-#define PERIOD_TIMESTAMP_MS 1000
-#define PERIOD_RAMP_MS 20
+#define PERIOD_TIMESTAMP_MS 10
+#define PERIOD_RAMP_MS 100
 #define FIRST_START_DELAY_MS 350
 #define BAUD_RATE_UART 115200
+
+#define UP_THRESHOLD 100
+#define DOWN_THRESHOLD 200
+#define PWM_STEP 10
 
 /*==================[internal data declaration]==============================*/
 uint8_t mensaje [100];
 static uint32_t TimeStampCounter = 0;
-static fsm StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0, .direction = 0};
+static fsm_t StateMachine = {.currentLED=RED, .fsm_status=PLAYER_IDLE, .dcycle=0};
 
 /*==================[internal functions declaration]=========================*/
 
@@ -148,7 +152,6 @@ TASK(InitTask)
 	mcu_pwm_start();
 
 	SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
-	//SetRelAlarm(ActivateTimeStampTask, FIRST_START_DELAY_MS, PERIOD_TIMESTAMP_MS);
 
 	TerminateTask();
 }
@@ -164,18 +167,24 @@ TASK(PlayStopTask)
 		{
 			case PLAYER_IDLE:
 				StateMachine.fsm_status = PLAYER_PLAYING;
-				sprintf(mensaje, "%u Inicio Secuencia\n", TimeStampCounter);
-				uartWriteString(UART_USB,mensaje);
+				sprintf(mensaje, "%u Inicio Secuencia\r\n", TimeStampCounter);
+				uartWriteString(UART_USB, mensaje);
+				SetRelAlarm(ActivateRampTask, 0, PERIOD_RAMP_MS);
 				break;
 			case PLAYER_PLAYING:
 				StateMachine.fsm_status = PLAYER_STOPPED;
-				sprintf(mensaje, "%u Secuencia Finalizada\n", TimeStampCounter);
-				uartWriteString(UART_USB,mensaje);
+				sprintf(mensaje, "%u Secuencia Finalizada\r\n", TimeStampCounter);
+				uartWriteString(UART_USB, mensaje);
+				CancelAlarm(ActivateRampTask);
+				StateMachine.dcycle = 0;
+				mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle);
+				StateMachine.currentLED = RED;
 				break;
 			case PLAYER_STOPPED:
 				StateMachine.fsm_status = PLAYER_PLAYING;
-				sprintf(mensaje, "%u Inicio Secuencia\n", TimeStampCounter);
-				uartWriteString(UART_USB,mensaje);
+				sprintf(mensaje, "%u Inicio Secuencia\r\n", TimeStampCounter);
+				uartWriteString(UART_USB, mensaje);
+				SetRelAlarm(ActivateRampTask, 0, PERIOD_RAMP_MS);
 				break;
 		}
 		ReleaseResource(UARTRES);
@@ -197,13 +206,15 @@ TASK(PauseResumeTask)
 			break;
 		case PLAYER_PLAYING:
 			StateMachine.fsm_status = PLAYER_PAUSED;
-			sprintf(mensaje, "%u Secuencia Pausada\n", TimeStampCounter);
-			uartWriteString(UART_USB,mensaje);
+			sprintf(mensaje, "%u Secuencia Pausada\r\n", TimeStampCounter);
+			uartWriteString(UART_USB, mensaje);
+			CancelAlarm(ActivateRampTask);
 			break;
 		case PLAYER_PAUSED:
 			StateMachine.fsm_status = PLAYER_PLAYING;
-			sprintf(mensaje, "%u Secuencia Reanudada\n", TimeStampCounter);
-			uartWriteString(UART_USB,mensaje);
+			sprintf(mensaje, "%u Secuencia Reanudada\r\n", TimeStampCounter);
+			uartWriteString(UART_USB, mensaje);
+			SetRelAlarm(ActivateRampTask, 0, PERIOD_RAMP_MS);
 			break;
 		}
 		ReleaseResource(UARTRES);
@@ -218,8 +229,55 @@ TASK(TimeStampTask)
 	TerminateTask();
 }
 
+led_enum_t switchCurrentLed(fsm_t machine){
+	switch(machine.currentLED){
+		case RED:
+			return GREEN;
+		case GREEN:
+			return BLUE;
+		case BLUE:
+			return RED;
+		default:
+			return RED;
+	}
+}
+
+uint8_t * getLedName(led_enum_t ledName){
+	switch(ledName){
+			case RED:
+				return "RED";
+			case GREEN:
+				return "GREEN";
+			case BLUE:
+				return "BLUE";
+			default:
+				return "WTF";
+		}
+}
+
+TASK(RampTask) {
+	if(StateMachine.dcycle == 0) {
+		sprintf(mensaje, "%u Encendido Led %s\r\n", TimeStampCounter, getLedName(StateMachine.currentLED));
+		uartWriteString(UART_USB, mensaje);
+	}
+	StateMachine.dcycle += PWM_STEP;
+	if(StateMachine.dcycle > 0 && StateMachine.dcycle < UP_THRESHOLD){
+		mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle);
+	} else if (StateMachine.dcycle >= UP_THRESHOLD && StateMachine.dcycle < DOWN_THRESHOLD){
+		if(StateMachine.dcycle == (UP_THRESHOLD + PWM_STEP)){
+			sprintf(mensaje, "%u Intensidad Maxima: Led %s\r\n", TimeStampCounter, getLedName(StateMachine.currentLED));
+			uartWriteString(UART_USB, mensaje);
+		}
+		mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, UP_THRESHOLD -(StateMachine.dcycle % UP_THRESHOLD));
+	} else {
+		StateMachine.dcycle = 0;
+		mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle);
+		StateMachine.currentLED = switchCurrentLed(StateMachine);
+	}
+	TerminateTask();
+}
+
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /*==================[end of file]============================================*/
-
