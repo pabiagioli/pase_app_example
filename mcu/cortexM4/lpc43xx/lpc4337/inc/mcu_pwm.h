@@ -21,7 +21,7 @@ typedef struct{
    int8_t pin;
 } pinConfigLpc4337_t;
 
-typedef enum {PWM3,PWM0,PWM7,PWM4,PWM9,PWM8,PWM10,PWM6,PWM2=10,PWM1=12,PWM5} pwm_channel;
+typedef enum {PWM3,PWM0,PWM7,PWM4,PWM9,PWM8,PWM10,PWM6,PWM2=10,PWM1=12,PWM5} pwm_channel_t;
 
 /* Enter a pwm number, get a sct number
  * Since this module works with pwm numbers, but uses sct channels to generate
@@ -49,7 +49,7 @@ static const uint8_t pwmMap[PWM_TOTALNUMBER] = {
  */
 static pinConfigLpc4337_t SCTdataList[] =
 {
-/* Sct n° | port | pin | name in board */
+/* Sct nï¿½ | port | pin | name in board */
 /* CTOUT0 */ { 4 , 2 }, /* T_FIL2 */
 /* CTOUT1 */ { 4 , 1 }, /* T_FIL1 */
 /* CTOUT2 */ { 2 , 10 }, /* LED1 (also for LCD1) */
@@ -68,8 +68,8 @@ static pinConfigLpc4337_t SCTdataList[] =
 
 
 extern void mcu_pwm_init(void);
-extern void configPWM(pwm_channel channel, uint32_t period);
-extern void mcu_pwm_setDutyCycle(uint32_t duty);
+extern void configPWM(pwm_channel_t channel, uint32_t period);
+extern void mcu_pwm_setDutyCycle(pwm_channel_t channel, uint32_t duty);
 extern void mcu_pwm_start(void);
 
 #endif /* MCU_PWM_H_ */
