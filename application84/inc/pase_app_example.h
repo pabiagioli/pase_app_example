@@ -54,13 +54,11 @@
 /*==================[typedef]================================================*/
 typedef enum {RED = PWM7, GREEN = PWM8, BLUE = PWM9} led_enum_t;
 typedef enum {PLAYER_PLAYING = 0, PLAYER_PAUSED, PLAYER_STOPPED, PLAYER_FAILURE, PLAYER_IDLE} playerState_enum_t;
-typedef enum { UP, DOWN } direction_enum;
 
 typedef struct fsm {
 	led_enum_t currentLED;
 	playerState_enum_t fsm_status;
 	uint32_t dcycle;
-	uint8_t direction;
 } fsm_t;
 
 
