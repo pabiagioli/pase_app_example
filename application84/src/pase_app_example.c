@@ -186,6 +186,14 @@ TASK(PlayStopTask)
 				uartWriteString(UART_USB, mensaje);
 				SetRelAlarm(ActivateRampTask, 0, PERIOD_RAMP_MS);
 				break;
+			case PLAYER_PAUSED:
+				StateMachine.fsm_status = PLAYER_STOPPED;
+				sprintf(mensaje, "%u Secuencia Finalizada\r\n", TimeStampCounter);
+				uartWriteString(UART_USB, mensaje);
+				StateMachine.dcycle = 0;
+				mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle);
+				StateMachine.currentLED = RED;
+
 		}
 		ReleaseResource(UARTRES);
 		WaitEvent(evPlayStopTask);
