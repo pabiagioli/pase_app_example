@@ -163,19 +163,22 @@ TASK(PlayStopTask)
 		{
 			case PLAYER_IDLE:
 				StateMachine.fsm_status = PLAYER_PLAYING;
-				sprintf(mensaje, "%u Inicio Secuencia\n", TimeStampCounter);
+				sprintf(mensaje, "%u Inicio Secuencia\r\n", TimeStampCounter);
 				uartWriteString(UART_USB, mensaje);
 				SetRelAlarm(ActivateRampTask, 0, 100);
 				break;
 			case PLAYER_PLAYING:
 				StateMachine.fsm_status = PLAYER_STOPPED;
-				sprintf(mensaje, "%u Secuencia Finalizada\n", TimeStampCounter);
+				sprintf(mensaje, "%u Secuencia Finalizada\r\n", TimeStampCounter);
 				uartWriteString(UART_USB, mensaje);
 				CancelAlarm(ActivateRampTask);
+				StateMachine.dcycle = 0;
+				mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle);
+				StateMachine.currentLED = RED;
 				break;
 			case PLAYER_STOPPED:
 				StateMachine.fsm_status = PLAYER_PLAYING;
-				sprintf(mensaje, "%u Inicio Secuencia\n", TimeStampCounter);
+				sprintf(mensaje, "%u Inicio Secuencia\r\n", TimeStampCounter);
 				uartWriteString(UART_USB, mensaje);
 				SetRelAlarm(ActivateRampTask, 0, 100);
 				break;
@@ -199,13 +202,13 @@ TASK(PauseResumeTask)
 			break;
 		case PLAYER_PLAYING:
 			StateMachine.fsm_status = PLAYER_PAUSED;
-			sprintf(mensaje, "%u Secuencia Pausada\n", TimeStampCounter);
+			sprintf(mensaje, "%u Secuencia Pausada\r\n", TimeStampCounter);
 			uartWriteString(UART_USB, mensaje);
 			CancelAlarm(ActivateRampTask);
 			break;
 		case PLAYER_PAUSED:
 			StateMachine.fsm_status = PLAYER_PLAYING;
-			sprintf(mensaje, "%u Secuencia Reanudada\n", TimeStampCounter);
+			sprintf(mensaje, "%u Secuencia Reanudada\r\n", TimeStampCounter);
 			uartWriteString(UART_USB, mensaje);
 			SetRelAlarm(ActivateRampTask, 0, 100);
 			break;
@@ -235,12 +238,34 @@ led_enum_t switchCurrentLed(fsm_t machine){
 	}
 }
 
+uint8_t * getLedName(led_enum_t ledName){
+	switch(ledName){
+			case RED:
+				return "RED";
+			case GREEN:
+				return "GREEN";
+			case BLUE:
+				return "BLUE";
+			default:
+				return "WTF";
+		}
+}
+
 TASK(RampTask) {
+	if(StateMachine.dcycle == 0) {
+		sprintf(mensaje, "%u Encendido Led %s\r\n", TimeStampCounter, getLedName(StateMachine.currentLED));
+		uartWriteString(UART_USB, mensaje);
+
+	}
 	StateMachine.dcycle += 10;
 	if(StateMachine.dcycle > 0 && StateMachine.dcycle < 100){
 		mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle);
-	} else if (StateMachine.dcycle > 100 && StateMachine.dcycle < 200){
-		mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle -(StateMachine.dcycle % 100));
+	} else if (StateMachine.dcycle >= 100 && StateMachine.dcycle < 200){
+		if(StateMachine.dcycle == 110){
+			sprintf(mensaje, "%u Intensidad Maxima: Led %s\r\n", TimeStampCounter, getLedName(StateMachine.currentLED));
+			uartWriteString(UART_USB, mensaje);
+		}
+		mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, 100 -(StateMachine.dcycle % 100));
 	} else {
 		StateMachine.dcycle = 0;
 		mcu_pwm_setDutyCycle((pwm_channel_t) StateMachine.currentLED, StateMachine.dcycle);
